@@ -19,7 +19,7 @@
 
 ### 0.2 Small Batch Rule
 
-- Generate **max of 5 files** if strongly coupled.
+- Generate **max of 5 files** if strongly coupled. Do not proceed with next batches without explict approval for current batch.
 
 - Every file MUST include:
     - clear namespace
