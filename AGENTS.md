@@ -26,7 +26,6 @@
     - minimal public surface
     - comments only where intent is non-obvious
 
-
 ---
 
 ## 1) Architecture SSOT (Mandatory)
