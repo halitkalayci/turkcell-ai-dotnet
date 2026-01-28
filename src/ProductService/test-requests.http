@@ -1,0 +1,47 @@
+### Create Product
+POST https://localhost:5001/api/v1/products
+Content-Type: application/json
+
+{
+  "name": "Laptop",
+  "description": "High-performance laptop",
+  "price": 1299.99,
+  "stockQuantity": 50,
+  "category": "Electronics"
+}
+
+###
+
+### List Products
+GET https://localhost:5001/api/v1/products?pageNumber=1&pageSize=10
+
+###
+
+### List Products with Filters
+GET https://localhost:5001/api/v1/products?category=Electronics&minPrice=100&maxPrice=2000
+
+###
+
+### Get Product by ID
+GET https://localhost:5001/api/v1/products/{{productId}}
+
+###
+
+### Update Product
+PUT https://localhost:5001/api/v1/products/{{productId}}
+Content-Type: application/json
+
+{
+  "name": "Gaming Laptop",
+  "description": "High-performance gaming laptop",
+  "price": 1499.99,
+  "stockQuantity": 45,
+  "category": "Electronics"
+}
+
+###
+
+### Delete Product
+DELETE https://localhost:5001/api/v1/products/{{productId}}
+
+###

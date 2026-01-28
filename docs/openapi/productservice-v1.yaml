@@ -1,0 +1,407 @@
+openapi: 3.0.3
+info:
+  title: Product Service API
+  description: Product Service for managing product catalog
+  version: 1.0.0
+  contact:
+    name: Product Service Team
+
+servers:
+  - url: https://api.example.com
+    description: Production server
+  - url: https://api-staging.example.com
+    description: Staging server
+
+tags:
+  - name: Products
+    description: Product management operations
+
+paths:
+  /api/v1/products:
+    post:
+      tags:
+        - Products
+      summary: Create a new product
+      description: Creates a new product in the catalog
+      operationId: createProduct
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProductRequest'
+      responses:
+        '201':
+          description: Product created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    get:
+      tags:
+        - Products
+      summary: List products
+      description: Retrieve a paginated list of products
+      operationId: listProducts
+      parameters:
+        - name: pageNumber
+          in: query
+          description: Page number (1-based)
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            default: 1
+        - name: pageSize
+          in: query
+          description: Number of items per page
+          required: false
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+            maximum: 100
+            default: 20
+        - name: category
+          in: query
+          description: Filter by category
+          required: false
+          schema:
+            type: string
+        - name: minPrice
+          in: query
+          description: Minimum price filter
+          required: false
+          schema:
+            type: number
+            format: decimal
+            minimum: 0
+        - name: maxPrice
+          in: query
+          description: Maximum price filter
+          required: false
+          schema:
+            type: number
+            format: decimal
+            minimum: 0
+      responses:
+        '200':
+          description: Products retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+  /api/v1/products/{id}:
+    get:
+      tags:
+        - Products
+      summary: Get product by ID
+      description: Retrieve a single product by its unique identifier
+      operationId: getProductById
+      parameters:
+        - name: id
+          in: path
+          description: Product unique identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '200':
+          description: Product retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    put:
+      tags:
+        - Products
+      summary: Update product
+      description: Update an existing product
+      operationId: updateProduct
+      parameters:
+        - name: id
+          in: path
+          description: Product unique identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProductRequest'
+      responses:
+        '200':
+          description: Product updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+    delete:
+      tags:
+        - Products
+      summary: Delete product
+      description: Delete a product from the catalog
+      operationId: deleteProduct
+      parameters:
+        - name: id
+          in: path
+          description: Product unique identifier
+          required: true
+          schema:
+            type: string
+            format: uuid
+      responses:
+        '204':
+          description: Product deleted successfully
+        '404':
+          description: Product not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    CreateProductRequest:
+      type: object
+      required:
+        - name
+        - price
+        - stockQuantity
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Product name
+        description:
+          type: string
+          maxLength: 2000
+          nullable: true
+          description: Product description
+        price:
+          type: number
+          format: decimal
+          minimum: 0.01
+          description: Product price (must be greater than 0)
+        stockQuantity:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Available stock quantity
+        category:
+          type: string
+          maxLength: 100
+          nullable: true
+          description: Product category
+
+    UpdateProductRequest:
+      type: object
+      required:
+        - name
+        - price
+        - stockQuantity
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 200
+          description: Product name
+        description:
+          type: string
+          maxLength: 2000
+          nullable: true
+          description: Product description
+        price:
+          type: number
+          format: decimal
+          minimum: 0.01
+          description: Product price (must be greater than 0)
+        stockQuantity:
+          type: integer
+          format: int32
+          minimum: 0
+          description: Available stock quantity
+        category:
+          type: string
+          maxLength: 100
+          nullable: true
+          description: Product category
+
+    Product:
+      type: object
+      required:
+        - id
+        - name
+        - price
+        - stockQuantity
+        - createdAt
+        - updatedAt
+      properties:
+        id:
+          type: string
+          format: uuid
+          description: Product unique identifier
+        name:
+          type: string
+          description: Product name
+        description:
+          type: string
+          nullable: true
+          description: Product description
+        price:
+          type: number
+          format: decimal
+          description: Product price
+        stockQuantity:
+          type: integer
+          format: int32
+          description: Available stock quantity
+        category:
+          type: string
+          nullable: true
+          description: Product category
+        createdAt:
+          type: string
+          format: date-time
+          description: Creation timestamp
+        updatedAt:
+          type: string
+          format: date-time
+          description: Last update timestamp
+
+    ProductListResponse:
+      type: object
+      required:
+        - items
+        - totalCount
+        - pageNumber
+        - pageSize
+        - totalPages
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Product'
+        totalCount:
+          type: integer
+          format: int32
+          description: Total number of products
+        pageNumber:
+          type: integer
+          format: int32
+          description: Current page number (1-based)
+        pageSize:
+          type: integer
+          format: int32
+          description: Number of items per page
+        totalPages:
+          type: integer
+          format: int32
+          description: Total number of pages
+
+    Error:
+      type: object
+      required:
+        - traceId
+        - code
+        - message
+      properties:
+        traceId:
+          type: string
+          description: Unique identifier for tracing the error
+        code:
+          type: string
+          description: Error code
+        message:
+          type: string
+          description: Human-readable error message
+        details:
+          type: string
+          nullable: true
+          description: Additional error details
+        errors:
+          type: array
+          nullable: true
+          description: Field-level validation errors
+          items:
+            type: object
+            required:
+              - field
+              - message
+            properties:
+              field:
+                type: string
+                description: Field name
+              message:
+                type: string
+                description: Validation error message
