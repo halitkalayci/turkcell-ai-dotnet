@@ -1,4 +1,5 @@
 using Microsoft.EntityFrameworkCore;
+using OrderService.Application.Ports;
 using OrderService.Domain.Entities;
 using OrderService.Domain.Enums;
 using OrderService.Infrastructure.Data;
@@ -18,7 +19,7 @@ public class OrderRepository : IOrderRepository
     {
         return await _context.Orders
             .Include(o => o.Items)
-            .FirstOrDefaultAsync(o => o.OrderId == orderId);
+            .FirstOrDefaultAsync(o => o.Id == orderId);
     }
 
     public async Task<(List<Order> Items, int TotalCount)> GetAllAsync(

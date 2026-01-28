@@ -1,30 +1,29 @@
-using FluentValidation;
+using MediatR;
 using Microsoft.AspNetCore.Mvc;
+using OrderService.Application.Commands.CreateOrder;
+using OrderService.Application.Commands.UpdateOrderStatus;
 using OrderService.Application.DTOs;
-using OrderService.Application.Services;
+using OrderService.Application.Queries.GetOrderById;
+using OrderService.Application.Queries.GetOrders;
 using OrderService.Domain.Enums;
 using System.Diagnostics;
 
 namespace OrderService.Controllers;
 
+/// <summary>
+/// Thin controller for order operations.
+/// Delegates all business logic to MediatR command and query handlers.
+/// </summary>
 [ApiController]
 [Route("api/v1/orders")]
 public class OrdersController : ControllerBase
 {
-    private readonly IOrderService _orderService;
-    private readonly IValidator<CreateOrderRequest> _createOrderValidator;
-    private readonly IValidator<UpdateOrderStatusRequest> _updateStatusValidator;
+    private readonly IMediator _mediator;
     private readonly ILogger<OrdersController> _logger;
 
-    public OrdersController(
-        IOrderService orderService,
-        IValidator<CreateOrderRequest> createOrderValidator,
-        IValidator<UpdateOrderStatusRequest> updateStatusValidator,
-        ILogger<OrdersController> logger)
+    public OrdersController(IMediator mediator, ILogger<OrdersController> logger)
     {
-        _orderService = orderService;
-        _createOrderValidator = createOrderValidator;
-        _updateStatusValidator = updateStatusValidator;
+        _mediator = mediator;
         _logger = logger;
     }
 
@@ -32,16 +31,9 @@ public class OrdersController : ControllerBase
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
-    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderRequest request)
+    public async Task<IActionResult> CreateOrder([FromBody] CreateOrderCommand command)
     {
-        var validationResult = await _createOrderValidator.ValidateAsync(request);
-        
-        if (!validationResult.IsValid)
-        {
-            throw new ValidationException(validationResult.Errors);
-        }
-
-        var order = await _orderService.CreateOrderAsync(request);
+        var order = await _mediator.Send(command);
         return CreatedAtAction(nameof(GetOrderById), new { orderId = order.OrderId }, order);
     }
 
@@ -52,31 +44,28 @@ public class OrdersController : ControllerBase
     public async Task<IActionResult> ListOrders(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20,
-        [FromQuery] string? status = null,
+        [FromQuery] OrderStatus? status = null,
         [FromQuery] Guid? customerId = null)
     {
         if (pageNumber < 1)
         {
-            return BadRequest(CreateErrorResponse("INVALID_PARAMETER", "pageNumber must be at least 1"));
+            return BadRequest(CreateErrorResponse(ErrorCode.INVALID_PARAMETER, "pageNumber must be at least 1"));
         }
 
         if (pageSize < 1 || pageSize > 100)
         {
-            return BadRequest(CreateErrorResponse("INVALID_PARAMETER", "pageSize must be between 1 and 100"));
+            return BadRequest(CreateErrorResponse(ErrorCode.INVALID_PARAMETER, "pageSize must be between 1 and 100"));
         }
 
-        OrderStatus? orderStatus = null;
-        if (!string.IsNullOrEmpty(status))
+        var query = new GetOrdersQuery
         {
-            if (!Enum.TryParse<OrderStatus>(status, true, out var parsedStatus))
-            {
-                return BadRequest(CreateErrorResponse("INVALID_PARAMETER", 
-                    "status must be one of: Pending, Confirmed, Shipped, Delivered, Cancelled"));
-            }
-            orderStatus = parsedStatus;
-        }
+            PageNumber = pageNumber,
+            PageSize = pageSize,
+            Status = status,
+            CustomerId = customerId
+        };
 
-        var result = await _orderService.GetOrdersAsync(pageNumber, pageSize, orderStatus, customerId);
+        var result = await _mediator.Send(query);
         return Ok(result);
     }
 
@@ -86,43 +75,33 @@ public class OrdersController : ControllerBase
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetOrderById([FromRoute] Guid orderId)
     {
-        var order = await _orderService.GetOrderByIdAsync(orderId);
+        var query = new GetOrderByIdQuery(orderId);
+        var order = await _mediator.Send(query);
         
         if (order == null)
         {
-            return NotFound(CreateErrorResponse("ORDER_NOT_FOUND", $"Order with ID {orderId} not found"));
+            return NotFound(CreateErrorResponse(ErrorCode.ORDER_NOT_FOUND, $"Order with ID {orderId} not found"));
         }
 
         return Ok(order);
     }
 
     [HttpPatch("{orderId}/status")]
-    [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> UpdateOrderStatus(
         [FromRoute] Guid orderId,
-        [FromBody] UpdateOrderStatusRequest request)
+        [FromBody] UpdateOrderStatusCommand command)
     {
-        var validationResult = await _updateStatusValidator.ValidateAsync(request);
+        command.OrderId = orderId;
+        await _mediator.Send(command);
         
-        if (!validationResult.IsValid)
-        {
-            throw new ValidationException(validationResult.Errors);
-        }
-
-        var order = await _orderService.UpdateOrderStatusAsync(orderId, request);
-        
-        if (order == null)
-        {
-            return NotFound(CreateErrorResponse("ORDER_NOT_FOUND", $"Order with ID {orderId} not found"));
-        }
-
-        return Ok(order);
+        return NoContent();
     }
 
-    private ErrorResponse CreateErrorResponse(string code, string message)
+    private ErrorResponse CreateErrorResponse(ErrorCode code, string message)
     {
         var traceId = Activity.Current?.Id ?? HttpContext.TraceIdentifier;
         return new ErrorResponse

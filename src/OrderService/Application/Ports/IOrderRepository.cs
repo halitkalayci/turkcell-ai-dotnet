@@ -1,8 +1,13 @@
 using OrderService.Domain.Entities;
 using OrderService.Domain.Enums;
 
-namespace OrderService.Infrastructure.Repositories;
+namespace OrderService.Application.Ports;
 
+/// <summary>
+/// Repository interface for Order aggregate.
+/// Defines the contract for order persistence operations.
+/// This is a port in the hexagonal architecture - implemented by Infrastructure layer.
+/// </summary>
 public interface IOrderRepository
 {
     Task<Order?> GetByIdAsync(Guid orderId);

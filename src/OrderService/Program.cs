@@ -1,7 +1,7 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using OrderService.Application.Services;
-using OrderService.Application.Validators;
+using OrderService.Application.Behaviors;
+using OrderService.Application.Ports;
 using OrderService.Infrastructure.Data;
 using OrderService.Infrastructure.Repositories;
 using OrderService.Middleware;
@@ -17,14 +17,23 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseInMemoryDatabase("OrderServiceDb"));
 
-// Repositories
+// Repositories and Unit of Work (Ports/Adapters)
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 
-// Services
-builder.Services.AddScoped<IOrderService, OrderService.Application.Services.OrderService>();
+// MediatR with pipeline behaviors
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssemblyContaining<Program>();
+    cfg.AddOpenBehavior(typeof(ValidationBehavior<,>));
+    cfg.AddOpenBehavior(typeof(TransactionBehavior<,>));
+});
 
-// Validators
-builder.Services.AddValidatorsFromAssemblyContaining<CreateOrderRequestValidator>();
+// AutoMapper
+builder.Services.AddAutoMapper(typeof(Program).Assembly);
+
+// FluentValidation
+builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 
 var app = builder.Build();
 
