@@ -87,3 +87,74 @@ If any contract is missing DO NOT PROCEED, ask.
     - `message`
     - `details` (optional)
     - `errors` (field-level validation list)
+
+
+---
+
+## 3) Shared Kernel (TurkcellAI.Core) - Mandatory
+
+TurkcellAI.Core is a shared class library that standardizes foundational building blocks across all microservices. It enforces the Layering and DDD/CQRS rules defined in sections 1.1, 1.2 and 1.3, and the error envelope in section 2.2.
+
+### 3.1 Core Library Scope
+
+Namespaces: `TurkcellAI.Core.Domain`, `TurkcellAI.Core.Application`, `TurkcellAI.Core.Infrastructure`.
+
+- Domain building blocks (pure):
+    - `Entity<TId>` base
+    - `AggregateRoot` marker
+    - `ValueObject` base
+- Application contracts:
+    - `IUnitOfWork` abstraction
+- Error handling:
+    - `ErrorResponse` and `ValidationError` DTOs
+    - Base `ErrorCode` enum with common codes (e.g., `VALIDATION_ERROR`, `INVALID_PARAMETER`, `NOT_FOUND`, `CONFLICT`, `UNAUTHORIZED`, `FORBIDDEN`, `INTERNAL_ERROR`)
+- Cross-cutting behaviors:
+    - `ValidationBehavior` (FluentValidation pipeline)
+    - `TransactionBehavior` (wraps command handlers in unit-of-work transactions)
+- Middleware:
+    - `ExceptionHandlingMiddleware` (maps exceptions to standardized error envelope)
+
+### 3.2 Dependency Rules
+
+- Core must remain pure and reusable; NO service-specific domain logic.
+- NO dependencies on EF Core, messaging, web frameworks inside `TurkcellAI.Core.Domain` and `TurkcellAI.Core.Application`.
+- Implementations that require web hosting integrations (e.g., middleware) live under `TurkcellAI.Core.Infrastructure` and keep minimal dependencies.
+- Aligns with Layering (1.1): Domain is pure, Application holds abstractions, Infrastructure provides implementations.
+
+### 3.3 ErrorCode Extensibility
+
+- Core defines base error codes shared across services.
+- Services MAY extend with service-specific codes in their own `Domain/Enums/[ServiceName]ErrorCode.cs` (e.g., `ORDER_NOT_FOUND`, `INVALID_STATUS_TRANSITION`).
+- All services MUST use an enum type for the error envelope `code` field (`ErrorCode` plus service-specific enum where applicable).
+- Service-specific codes MUST NOT conflict with Core base codes.
+
+### 3.4 Service Integration
+
+- All microservices MUST reference `TurkcellAI.Core`.
+- NEW services MUST start with Core from day one.
+- Domain entities/aggregates/value objects MUST derive from Core base classes.
+- Error responses MUST use Core `ErrorResponse` envelope and enum-based `code`.
+- Where applicable, services SHOULD adopt Core MediatR behaviors and middleware.
+
+### 3.5 Migration Strategy (Incremental)
+
+Incremental migration in two phases: OrderService first, ProductService second.
+
+Phase 1 — OrderService
+- Create `TurkcellAI.Core` class library with the scope in 3.1.
+- Extract Domain building blocks (Aggregate, Entity, ValueObject) from OrderService into `TurkcellAI.Core.Domain`.
+- Move `ErrorResponse` and `ValidationError` DTOs into `TurkcellAI.Core.Application`.
+- Define base `ErrorCode` in Core; keep OrderService-specific codes in `OrderService.Domain.Enums`.
+- Move `ValidationBehavior` and `TransactionBehavior` into `TurkcellAI.Core.Application`.
+- Move `ExceptionHandlingMiddleware` into `TurkcellAI.Core.Infrastructure`.
+- Reference Core from OrderService; update namespaces and imports accordingly.
+
+Phase 2 — ProductService
+- Reference `TurkcellAI.Core`.
+- Replace service-specific base entity with Core `Entity<Guid>`; adopt Core `AggregateRoot`/`ValueObject` where relevant.
+- Adopt Core `ErrorResponse` and enum-based `ErrorCode`.
+- Create `ProductErrorCode` in `ProductService.Domain.Enums` for service-specific codes (e.g., `PRODUCT_NOT_FOUND`).
+- Replace local exception middleware with Core `ExceptionHandlingMiddleware`.
+- Adopt Core `ValidationBehavior` and `TransactionBehavior` where applicable.
+
+
