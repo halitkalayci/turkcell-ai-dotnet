@@ -1,9 +1,11 @@
+using TurkcellAI.Core.Domain;
+
 namespace ProductService.Domain.Entities;
 
 /// <summary>
 /// Product aggregate root - represents a product in the catalog
 /// </summary>
-public class Product : BaseEntity
+public class Product : Entity<Guid>
 {
     public string Name { get; private set; }
     public string? Description { get; private set; }
@@ -14,7 +16,7 @@ public class Product : BaseEntity
     public DateTime UpdatedAt { get; private set; }
 
     // EF Core constructor
-    private Product()
+    private Product() : base(Guid.Empty)
     {
         Name = string.Empty;
     }
@@ -28,6 +30,7 @@ public class Product : BaseEntity
         ValidatePrice(price);
         ValidateStockQuantity(stockQuantity);
 
+        Id = Guid.NewGuid();
         Name = name;
         Price = price;
         StockQuantity = stockQuantity;

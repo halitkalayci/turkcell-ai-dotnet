@@ -1,10 +1,11 @@
 using FluentValidation;
 using Microsoft.EntityFrameworkCore;
-using OrderService.Application.Behaviors;
+using TurkcellAI.Core.Application.Abstractions;
+using TurkcellAI.Core.Application.Behaviors;
+using TurkcellAI.Core.Infrastructure;
 using OrderService.Application.Ports;
 using OrderService.Infrastructure.Data;
 using OrderService.Infrastructure.Repositories;
-using OrderService.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,7 +20,7 @@ builder.Services.AddDbContext<OrderDbContext>(options =>
 
 // Repositories and Unit of Work (Ports/Adapters)
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
-builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<TurkcellAI.Core.Application.Abstractions.IUnitOfWork, UnitOfWork>();
 
 // MediatR with pipeline behaviors
 builder.Services.AddMediatR(cfg =>
@@ -38,7 +39,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 var app = builder.Build();
 
 // Middleware
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseCoreExceptionHandling();
 
 if (app.Environment.IsDevelopment())
 {

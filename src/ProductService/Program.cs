@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using ProductService.Application.Services;
 using ProductService.Infrastructure.Data;
 using ProductService.Infrastructure.Repositories;
-using ProductService.Middleware;
+using TurkcellAI.Core.Infrastructure;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -28,7 +28,7 @@ builder.Services.AddValidatorsFromAssemblyContaining<Program>();
 var app = builder.Build();
 
 // Configure middleware
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseCoreExceptionHandling();
 
 if (app.Environment.IsDevelopment())
 {

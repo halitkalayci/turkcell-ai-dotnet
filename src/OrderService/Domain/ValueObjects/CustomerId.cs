@@ -1,4 +1,4 @@
-using OrderService.Domain.Common;
+using TurkcellAI.Core.Domain;
 
 namespace OrderService.Domain.ValueObjects;
 

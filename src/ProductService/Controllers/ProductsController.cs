@@ -1,6 +1,8 @@
 using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using ProductService.Application.DTOs;
+using TurkcellAI.Core.Application.DTOs;
+using TurkcellAI.Core.Application.Enums;
 using ProductService.Application.Services;
 
 namespace ProductService.Controllers;
@@ -25,19 +27,19 @@ public class ProductsController : ControllerBase
 
     [HttpPost]
     [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status201Created)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> CreateProduct([FromBody] CreateProductRequest request)
     {
         var validationResult = await _createValidator.ValidateAsync(request);
         if (!validationResult.IsValid)
         {
-            var errorResponse = new ErrorResponse
+            var errorResponse = new TurkcellAI.Core.Application.DTOs.ErrorResponse
             {
                 TraceId = HttpContext.TraceIdentifier,
-                Code = "VALIDATION_ERROR",
+                Code = ErrorCode.VALIDATION_ERROR,
                 Message = "Validation failed",
-                Errors = validationResult.Errors.Select(e => new ValidationError
+                Errors = validationResult.Errors.Select(e => new TurkcellAI.Core.Application.DTOs.ValidationError
                 {
                     Field = e.PropertyName,
                     Message = e.ErrorMessage
@@ -52,8 +54,8 @@ public class ProductsController : ControllerBase
 
     [HttpGet]
     [ProducesResponseType(typeof(ProductListResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> ListProducts(
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20,
@@ -63,20 +65,20 @@ public class ProductsController : ControllerBase
     {
         if (pageNumber < 1)
         {
-            return BadRequest(new ErrorResponse
+            return BadRequest(new TurkcellAI.Core.Application.DTOs.ErrorResponse
             {
                 TraceId = HttpContext.TraceIdentifier,
-                Code = "INVALID_PAGE_NUMBER",
+                Code = ErrorCode.INVALID_PARAMETER,
                 Message = "Page number must be greater than 0"
             });
         }
 
         if (pageSize < 1 || pageSize > 100)
         {
-            return BadRequest(new ErrorResponse
+            return BadRequest(new TurkcellAI.Core.Application.DTOs.ErrorResponse
             {
                 TraceId = HttpContext.TraceIdentifier,
-                Code = "INVALID_PAGE_SIZE",
+                Code = ErrorCode.INVALID_PARAMETER,
                 Message = "Page size must be between 1 and 100"
             });
         }
@@ -87,17 +89,17 @@ public class ProductsController : ControllerBase
 
     [HttpGet("{id}")]
     [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> GetProductById([FromRoute] Guid id)
     {
         var product = await _productService.GetByIdAsync(id);
         if (product == null)
         {
-            return NotFound(new ErrorResponse
+            return NotFound(new TurkcellAI.Core.Application.DTOs.ErrorResponse
             {
                 TraceId = HttpContext.TraceIdentifier,
-                Code = "PRODUCT_NOT_FOUND",
+                Code = ErrorCode.NOT_FOUND,
                 Message = $"Product with ID {id} not found"
             });
         }
@@ -107,20 +109,20 @@ public class ProductsController : ControllerBase
 
     [HttpPut("{id}")]
     [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> UpdateProduct([FromRoute] Guid id, [FromBody] UpdateProductRequest request)
     {
         var validationResult = await _updateValidator.ValidateAsync(request);
         if (!validationResult.IsValid)
         {
-            var errorResponse = new ErrorResponse
+            var errorResponse = new TurkcellAI.Core.Application.DTOs.ErrorResponse
             {
                 TraceId = HttpContext.TraceIdentifier,
-                Code = "VALIDATION_ERROR",
+                Code = ErrorCode.VALIDATION_ERROR,
                 Message = "Validation failed",
-                Errors = validationResult.Errors.Select(e => new ValidationError
+                Errors = validationResult.Errors.Select(e => new TurkcellAI.Core.Application.DTOs.ValidationError
                 {
                     Field = e.PropertyName,
                     Message = e.ErrorMessage
@@ -132,10 +134,10 @@ public class ProductsController : ControllerBase
         var product = await _productService.UpdateAsync(id, request);
         if (product == null)
         {
-            return NotFound(new ErrorResponse
+            return NotFound(new TurkcellAI.Core.Application.DTOs.ErrorResponse
             {
                 TraceId = HttpContext.TraceIdentifier,
-                Code = "PRODUCT_NOT_FOUND",
+                Code = ErrorCode.NOT_FOUND,
                 Message = $"Product with ID {id} not found"
             });
         }
@@ -145,17 +147,17 @@ public class ProductsController : ControllerBase
 
     [HttpDelete("{id}")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status404NotFound)]
-    [ProducesResponseType(typeof(ErrorResponse), StatusCodes.Status500InternalServerError)]
+    [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status404NotFound)]
+    [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status500InternalServerError)]
     public async Task<IActionResult> DeleteProduct([FromRoute] Guid id)
     {
         var deleted = await _productService.DeleteAsync(id);
         if (!deleted)
         {
-            return NotFound(new ErrorResponse
+            return NotFound(new TurkcellAI.Core.Application.DTOs.ErrorResponse
             {
                 TraceId = HttpContext.TraceIdentifier,
-                Code = "PRODUCT_NOT_FOUND",
+                Code = ErrorCode.NOT_FOUND,
                 Message = $"Product with ID {id} not found"
             });
         }

@@ -9,6 +9,9 @@ public abstract class Entity<TId>
         Id = id;
     }
 
+    // Parameterless constructor for EF Core
+    protected Entity() { }
+
     public override bool Equals(object? obj)
     {
         if (obj is not Entity<TId> other)

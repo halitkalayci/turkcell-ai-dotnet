@@ -1,4 +1,4 @@
-using OrderService.Application.Ports;
+using TurkcellAI.Core.Application.Abstractions;
 
 namespace OrderService.Infrastructure.Data;
 
@@ -15,8 +15,21 @@ public class UnitOfWork : IUnitOfWork
         _context = context;
     }
 
-    public async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
+    // Transaction methods for Core IUnitOfWork (InMemory DB)
+    public Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
-        return await _context.SaveChangesAsync(cancellationToken);
+        // InMemory provider does not support real transactions; no-op
+        return Task.CompletedTask;
+    }
+
+    public async Task CommitAsync(CancellationToken cancellationToken = default)
+    {
+        await _context.SaveChangesAsync(cancellationToken);
+    }
+
+    public Task RollbackAsync(CancellationToken cancellationToken = default)
+    {
+        // InMemory provider does not support rollback; no-op
+        return Task.CompletedTask;
     }
 }
