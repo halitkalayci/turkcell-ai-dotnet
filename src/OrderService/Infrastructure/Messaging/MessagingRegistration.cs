@@ -16,6 +16,21 @@ public static class MessagingRegistration
             .ValidateDataAnnotations()
             .ValidateOnStart();
 
+        // If messaging is disabled, configure in-memory bus so handlers can still publish without external broker
+        var messagingEnabled = configuration.GetSection("Messaging").GetValue<bool>("Enabled");
+        if (!messagingEnabled)
+        {
+            services.AddMassTransit(x =>
+            {
+                x.UsingInMemory((context, cfg) =>
+                {
+                    cfg.ConfigureEndpoints(context);
+                });
+            });
+
+            return services;
+        }
+
         services.AddMassTransit(x =>
         {
             // Outbox: keep messages until the DB transaction commits
@@ -46,7 +61,7 @@ public static class MessagingRegistration
                         options.Retry.MaxAttempts,
                         options.Retry.MinBackoff,
                         options.Retry.MaxBackoff,
-                        options.Retry.IntervalFactor));
+                        TimeSpan.FromSeconds(options.Retry.IntervalFactor)));
 
                 cfg.ConfigureEndpoints(context);
             });

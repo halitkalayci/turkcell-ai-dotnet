@@ -59,7 +59,7 @@ public class CreateOrderCommandHandler : IRequestHandler<CreateOrderCommand, Ord
             CustomerId: createdOrder.CustomerId.Value,
             TotalAmount: createdOrder.TotalAmount.Amount,
             Currency: createdOrder.TotalAmount.Currency,
-            CreatedAtUtc: createdOrder.CreatedAtUtc
+            CreatedAtUtc: createdOrder.OrderDate
         );
         await _publishEndpoint.Publish(evt, cancellationToken);
 

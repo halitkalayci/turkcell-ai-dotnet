@@ -3,9 +3,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 using TurkcellAI.Core.Application.DTOs;
-using TurkcellAI.Core.Infrastructure.Messaging;
 using TurkcellAI.Core.Application.Abstractions.Messaging;
 using ProductService.Infrastructure.Messaging.Idempotency;
+using ProductService.Infrastructure.Messaging.Consumers;
 
 namespace ProductService.Infrastructure.Messaging;
 
@@ -19,7 +19,6 @@ public static class MessagingRegistration
             .ValidateOnStart();
 
         services.AddScoped<IIdempotencyStore, EfIdempotencyStore>();
-        services.AddScoped(typeof(IdempotencyConsumeFilter<>));
 
         services.AddMassTransit(x =>
         {
@@ -50,10 +49,7 @@ public static class MessagingRegistration
                         options.Retry.MaxAttempts,
                         options.Retry.MinBackoff,
                         options.Retry.MaxBackoff,
-                        options.Retry.IntervalFactor));
-
-                // Apply idempotency filter globally to all message types
-                cfg.UseConsumeFilter(typeof(IdempotencyConsumeFilter<>), context);
+                        TimeSpan.FromSeconds(1)));
 
                 cfg.ConfigureEndpoints(context);
             });

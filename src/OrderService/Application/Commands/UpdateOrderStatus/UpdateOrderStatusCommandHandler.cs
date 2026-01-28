@@ -2,6 +2,7 @@ using MediatR;
 using OrderService.Application.Ports;
 using MassTransit;
 using TurkcellAI.Contracts.Orders.V1;
+using DomainStatus = OrderService.Domain.Enums.OrderStatus;
 
 namespace OrderService.Application.Commands.UpdateOrderStatus;
 
@@ -31,6 +32,7 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
         }
 
         // Use domain method to update status (enforces business rules)
+        var oldStatus = order.Status;
         order.UpdateStatus(request.NewStatus);
 
         // Persist changes
@@ -43,8 +45,8 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
             Source: "order-service",
             Version: "1.0",
             OrderId: order.Id,
-            OldStatus: OrderStatus.Unknown, // domain value not exposed; map if available
-            NewStatus: Enum.TryParse<OrderStatus>(request.NewStatus, true, out var ns) ? ns : OrderStatus.Unknown,
+            OldStatus: MapToContractStatus(oldStatus),
+            NewStatus: MapToContractStatus(order.Status),
             ChangedAtUtc: DateTime.UtcNow,
             Reason: null
         );
@@ -52,4 +54,15 @@ public class UpdateOrderStatusCommandHandler : IRequestHandler<UpdateOrderStatus
 
         return Unit.Value;
     }
+
+    private static TurkcellAI.Contracts.Orders.V1.OrderStatus MapToContractStatus(DomainStatus status)
+        => status switch
+        {
+            DomainStatus.Pending => TurkcellAI.Contracts.Orders.V1.OrderStatus.Pending,
+            DomainStatus.Confirmed => TurkcellAI.Contracts.Orders.V1.OrderStatus.Confirmed,
+            DomainStatus.Shipped => TurkcellAI.Contracts.Orders.V1.OrderStatus.Shipped,
+            DomainStatus.Delivered => TurkcellAI.Contracts.Orders.V1.OrderStatus.Delivered,
+            DomainStatus.Cancelled => TurkcellAI.Contracts.Orders.V1.OrderStatus.Cancelled,
+            _ => TurkcellAI.Contracts.Orders.V1.OrderStatus.Unknown
+        };
 }
