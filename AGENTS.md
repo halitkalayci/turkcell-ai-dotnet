@@ -30,6 +30,39 @@
 
 ## 1) Architecture SSOT (Mandatory)
 
+### 1.1 Layering (Onion Alignment)
+
+**Domain** (pure)
+- Entites, Value Object, Aggregates, Domain Events, Specs
+- NO dependencies on Infrastructure, Web, EF Core, Messaging, Logging
+
+**Application**  
+- Use cases: Commands/Queries + Handlers
+- Ports/Interfaces: repositories, external services
+- Validation + policies
+- NO EF Core DbContext usage here (only abstractions)
+
+**Infrastructure**  
+- EF Core, repositories implementations
+- Message bus implementations, outbox publisher, external API clients
+- Observability plumbing
+
+**API**  
+- Controllers (thin)
+- AuthZ/AuthN, request/response models (DTO)
+- Contract-first bindings
+
+### 1.2 DDD Invariants
+- External world interacts only via **Aggregate Roots**
+- State changes only via methods on aggregate (no anemic setters)
+- Domain rules must be enforced inside domain model, not only in controllers.
+
+### 1.3 CQRS Rules
+- Commands mutate state; Queries never mutate state.
+- Write model and Read model may diverge.
+- Separate DTOs for read vs write.
+- MediatR is default for orchestration (unless explicitly changed).
+
 ---
 
 ## 2) Contract-First (OpenAPI) - Non-Negotiable
