@@ -1,0 +1,78 @@
+### Order Service API Test Collection
+
+@baseUrl = http://localhost:5000/api/v1
+
+### 1. Create Order (Valid)
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "customerId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "items": [
+    {
+      "productId": "1fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "quantity": 2
+    },
+    {
+      "productId": "2fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "quantity": 1
+    }
+  ]
+}
+
+### 2. Create Order (Validation Error - Empty Items)
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "customerId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "items": []
+}
+
+### 3. Create Order (Validation Error - Invalid Quantity)
+POST {{baseUrl}}/orders
+Content-Type: application/json
+
+{
+  "customerId": "3fa85f64-5717-4562-b3fc-2c963f66afa6",
+  "items": [
+    {
+      "productId": "1fa85f64-5717-4562-b3fc-2c963f66afa6",
+      "quantity": 0
+    }
+  ]
+}
+
+### 4. List All Orders
+GET {{baseUrl}}/orders?pageNumber=1&pageSize=20
+
+### 5. List Orders by Status
+GET {{baseUrl}}/orders?status=Pending
+
+### 6. List Orders by Customer
+GET {{baseUrl}}/orders?customerId=3fa85f64-5717-4562-b3fc-2c963f66afa6
+
+### 7. Get Order by ID (Replace with actual order ID from create)
+@orderId = 00000000-0000-0000-0000-000000000000
+GET {{baseUrl}}/orders/{{orderId}}
+
+### 8. Get Order by ID (Not Found)
+GET {{baseUrl}}/orders/99999999-9999-9999-9999-999999999999
+
+### 9. Update Order Status (Valid)
+@orderId = 00000000-0000-0000-0000-000000000000
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Content-Type: application/json
+
+{
+  "status": "Confirmed"
+}
+
+### 10. Update Order Status (Invalid Status)
+@orderId = 00000000-0000-0000-0000-000000000000
+PATCH {{baseUrl}}/orders/{{orderId}}/status
+Content-Type: application/json
+
+{
+  "status": "InvalidStatus"
+}
