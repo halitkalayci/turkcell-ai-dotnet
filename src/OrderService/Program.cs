@@ -3,6 +3,8 @@ using Microsoft.EntityFrameworkCore;
 using TurkcellAI.Core.Application.Abstractions;
 using TurkcellAI.Core.Application.Behaviors;
 using TurkcellAI.Core.Infrastructure;
+using OrderService.Infrastructure.Messaging;
+using TurkcellAI.Core.Application.DTOs;
 using OrderService.Application.Ports;
 using OrderService.Infrastructure.Data;
 using OrderService.Infrastructure.Repositories;
@@ -35,6 +37,9 @@ builder.Services.AddAutoMapper(typeof(Program).Assembly);
 
 // FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+// Messaging (MassTransit + RabbitMQ + Outbox)
+builder.Services.AddOrderServiceMessaging(builder.Configuration);
 
 var app = builder.Build();
 

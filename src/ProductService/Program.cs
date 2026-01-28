@@ -4,6 +4,7 @@ using ProductService.Application.Services;
 using ProductService.Infrastructure.Data;
 using ProductService.Infrastructure.Repositories;
 using TurkcellAI.Core.Infrastructure;
+using ProductService.Infrastructure.Messaging;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -24,6 +25,9 @@ builder.Services.AddScoped<IProductService, ProductService.Application.Services.
 
 // Add FluentValidation
 builder.Services.AddValidatorsFromAssemblyContaining<Program>();
+
+// Messaging (MassTransit + RabbitMQ)
+builder.Services.AddProductServiceMessaging(builder.Configuration);
 
 var app = builder.Build();
 

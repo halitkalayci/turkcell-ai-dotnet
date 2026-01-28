@@ -1,1 +1,0 @@
-## COMMUNICATION.MD - All Communication Rules for across services.

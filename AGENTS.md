@@ -158,3 +158,10 @@ Phase 2 — ProductService
 - Adopt Core `ValidationBehavior` and `TransactionBehavior` where applicable.
 
 
+
+
+--- 
+
+## 4) COMMUNICATION
+
+For any communication rules you MUST follow [01-messaging-governance.md](docs/architecture/01-messaging-governance.md)

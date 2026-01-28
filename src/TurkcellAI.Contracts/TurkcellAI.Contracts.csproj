@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net9.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PackageId>TurkcellAI.Contracts</PackageId>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\TurkcellAI.Core\TurkcellAI.Core.csproj" />
+  </ItemGroup>
+</Project>

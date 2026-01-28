@@ -13,10 +13,14 @@
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.0" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="7.2.0" />
     <PackageReference Include="FluentValidation.AspNetCore" Version="11.3.0" />
+    <PackageReference Include="MassTransit" Version="8.2.4" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="8.2.4" />
+    <PackageReference Include="MassTransit.EntityFrameworkCore" Version="8.2.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\TurkcellAI.Core\TurkcellAI.Core.csproj" />
+      <ProjectReference Include="..\TurkcellAI.Contracts\TurkcellAI.Contracts.csproj" />
   </ItemGroup>
 
 </Project>
