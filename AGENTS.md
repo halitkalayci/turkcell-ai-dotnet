@@ -9,4 +9,16 @@
 
 ---
 
-...
+## 0) Operation Mode
+
+---
+
+## 1) Architecture SSOT (Mandatory)
+
+---
+
+## 2) Contract-First (OpenAPI) - Non-Negotiable
+
+We are using Contract-First development for the entire project. If you are developing against contracts the output is WRONG.
+
+If any contract is missing DO NOT PROCEED, ask.
