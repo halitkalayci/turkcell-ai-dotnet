@@ -3,10 +3,7 @@
     "Routes": {
       "orders-route": {
         "ClusterId": "orders-cluster",
-        "Match": { "Path": "/api/v1/orders/{**catchall}" },
-        "Transforms": [
-          { "PathRemovePrefix": "/" }
-        ]
+        "Match": { "Path": "/api/v1/orders/{**catchall}" }
       },
       "orders-root-route": {
         "ClusterId": "orders-cluster",

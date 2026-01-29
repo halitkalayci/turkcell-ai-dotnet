@@ -31,6 +31,17 @@ public class OrdersController : ControllerBase
         _logger = logger;
     }
 
+
+    /// <summary>
+    /// Test endpoint: No-auth, returns a dummy order list for health check.
+    /// </summary>
+    [HttpGet("test-noauth")]
+    [AllowAnonymous]
+    public IActionResult TestNoAuth()
+    {
+        return Ok(new[] { new { OrderId = Guid.Empty, Status = "Test", Message = "OrderService no-auth endpoint works" } });
+    }
+
     [HttpPost]
     [Authorize(Policy = PolicyNames.OrdersCreate)]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status201Created)]

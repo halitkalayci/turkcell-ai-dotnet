@@ -9,6 +9,9 @@ using TurkcellAI.Gateway.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Load YARP routes from external yarp.json as part of configuration
+builder.Configuration.AddJsonFile("yarp.json", optional: false, reloadOnChange: true);
+
 // Config bindings
 builder.Services.Configure<RequestSecurityOptions>(builder.Configuration.GetSection("Security"));
 

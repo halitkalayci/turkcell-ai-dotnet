@@ -27,6 +27,17 @@ public class ProductsController : ControllerBase
         _updateValidator = updateValidator;
     }
 
+
+    /// <summary>
+    /// Test endpoint: No-auth, returns a dummy product list for health check.
+    /// </summary>
+    [HttpGet("test-noauth")]
+    [AllowAnonymous]
+    public IActionResult TestNoAuth()
+    {
+        return Ok(new[] { new { ProductId = Guid.Empty, Name = "Test", Message = "ProductService no-auth endpoint works" } });
+    }
+
     [HttpPost]
     [Authorize(Policy = PolicyNames.ProductsCreate)]
     [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status201Created)]
