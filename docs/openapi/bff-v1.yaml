@@ -1,0 +1,128 @@
+openapi: 3.0.3
+info:
+  title: TurkcellAI BFF API
+  version: v1
+  description: >-
+    Backend-for-Frontend for browser clients. Handles OIDC Authorization Code + PKCE
+    with Keycloak, maintains a secure session cookie, exposes user/session endpoints,
+    and proxies API requests on behalf of the user.
+servers:
+  - url: http://localhost:8081
+    description: Dev
+paths:
+  /bff/login/start:
+    get:
+      summary: Initiate OIDC login
+      description: Redirects the browser to the IdP authorization endpoint.
+      responses:
+        '302':
+          description: Redirect to identity provider
+  /signin-oidc:
+    get:
+      summary: OIDC redirect callback
+      description: Handles the authorization code flow callback and establishes session.
+      responses:
+        '302':
+          description: Redirect to application after successful sign-in
+        '400':
+          description: Invalid authorization response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /bff/logout:
+    post:
+      summary: Logout current session
+      security:
+        - cookieAuth: []
+      responses:
+        '204':
+          description: Logged out
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /bff/user:
+    get:
+      summary: Get current user profile and permissions
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Current user info
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserInfo'
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /bff/refresh:
+    post:
+      summary: Refresh session/token (optional)
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Session refreshed
+        '401':
+          description: Not authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: session
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [traceId, code, message]
+      properties:
+        traceId:
+          type: string
+        code:
+          type: string
+          description: Enum code aligned with Core ErrorCode
+          example: UNAUTHORIZED
+        message:
+          type: string
+        details:
+          type: string
+          nullable: true
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+    UserInfo:
+      type: object
+      properties:
+        subject:
+          type: string
+          description: User id (sub) or client id
+        permissions:
+          type: array
+          items:
+            type: string
+        name:
+          type: string
+          nullable: true
+        email:
+          type: string
+          nullable: true
+          format: email

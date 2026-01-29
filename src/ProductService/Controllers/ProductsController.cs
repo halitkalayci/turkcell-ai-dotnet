@@ -32,7 +32,7 @@ public class ProductsController : ControllerBase
     /// Test endpoint: No-auth, returns a dummy product list for health check.
     /// </summary>
     [HttpGet("test-noauth")]
-    [AllowAnonymous]
+    [Authorize()]
     public IActionResult TestNoAuth()
     {
         return Ok(new[] { new { ProductId = Guid.Empty, Name = "Test", Message = "ProductService no-auth endpoint works" } });

@@ -16,6 +16,14 @@
       "products-root-route": {
         "ClusterId": "products-cluster",
         "Match": { "Path": "/api/v1/products" }
+      },
+      "bff-route": {
+        "ClusterId": "bff-cluster",
+        "Match": { "Path": "/bff/{**catchall}" }
+      },
+      "bff-callback-route": {
+        "ClusterId": "bff-cluster",
+        "Match": { "Path": "/signin-oidc" }
       }
     },
     "Clusters": {
@@ -27,6 +35,11 @@
       "products-cluster": {
         "Destinations": {
           "productservice": { "Address": "http://localhost:5002/" }
+        }
+      },
+      "bff-cluster": {
+        "Destinations": {
+          "bff": { "Address": "http://localhost:8081/" }
         }
       }
     }

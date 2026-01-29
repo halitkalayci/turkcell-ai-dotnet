@@ -1,0 +1,144 @@
+openapi: 3.0.3
+info:
+  title: TurkcellAI Identity Service API
+  version: v1
+  description: >-
+    A thin facade over Keycloak for controlled token operations, JWKS, and user info.
+    Avoids duplicating IdP features; primarily proxies with policy and caching.
+servers:
+  - url: http://localhost:8083
+    description: Dev
+paths:
+  /oauth/token:
+    post:
+      summary: Obtain token (client credentials or auth code exchange)
+      description: Proxies token requests to the IdP token endpoint.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OAuth2 token response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /oauth/token-exchange:
+    post:
+      summary: Token exchange (optional)
+      description: Exchanges a token for another audience/scope if enabled.
+      requestBody:
+        required: true
+        content:
+          application/x-www-form-urlencoded:
+            schema:
+              type: object
+              additionalProperties: true
+      responses:
+        '200':
+          description: OAuth2 token response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenResponse'
+        '400':
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+  /oauth/public-keys:
+    get:
+      summary: Public keys (JWKS)
+      description: Proxies JWKS for token validation.
+      responses:
+        '200':
+          description: JSON Web Key Set
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  keys:
+                    type: array
+                    items:
+                      type: object
+  /userinfo:
+    get:
+      summary: User info
+      description: Returns user claims for the provided access token.
+      security:
+        - bearerAuth: []
+      responses:
+        '200':
+          description: User claims
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: true
+        '401':
+          description: Unauthorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  schemas:
+    ErrorResponse:
+      type: object
+      required: [traceId, code, message]
+      properties:
+        traceId:
+          type: string
+        code:
+          type: string
+          description: Enum code aligned with Core ErrorCode
+          example: INVALID_PARAMETER
+        message:
+          type: string
+        details:
+          type: string
+          nullable: true
+        errors:
+          type: array
+          items:
+            $ref: '#/components/schemas/ValidationError'
+    ValidationError:
+      type: object
+      properties:
+        field:
+          type: string
+        message:
+          type: string
+    TokenResponse:
+      type: object
+      properties:
+        access_token:
+          type: string
+        token_type:
+          type: string
+          example: Bearer
+        expires_in:
+          type: integer
+        refresh_token:
+          type: string
+          nullable: true
+        scope:
+          type: string
+          nullable: true

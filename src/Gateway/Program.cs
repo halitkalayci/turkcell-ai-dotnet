@@ -40,6 +40,7 @@ builder.Services.AddRateLimiter(options =>
 
 // Authentication (JWT via Keycloak)
 var authority = builder.Configuration["Jwt:Authority"] ?? "http://localhost:8080/realms/turkcell-ai";
+var validAudiences = builder.Configuration.GetSection("Jwt:ValidAudiences").Get<string[]>() ?? new[] { "gateway" };
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 	.AddJwtBearer(options =>
 	{
@@ -49,7 +50,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 		{
 			ValidateIssuer = true,
 			ValidIssuer = authority,
-			ValidateAudience = false, // set to true and configure valid audiences when ready
+			ValidateAudience = true,
+			ValidAudiences = validAudiences,
 			ValidateLifetime = true,
 			ClockSkew = TimeSpan.FromMinutes(2)
 		};

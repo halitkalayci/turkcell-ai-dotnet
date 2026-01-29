@@ -3,9 +3,9 @@
 Defines OAuth2/OIDC flows, token lifetimes, rotation, and revocation policies for the platform using Keycloak as the default IdP.
 
 ## Flows
-- Browser/SPAs: Authorization Code Flow with PKCE.
-- Service-to-Service: Client Credentials Flow.
-- Optional: Token Exchange for propagating limited user context to downstream services when strictly required.
+- Browser/SPAs (via BFF): Authorization Code Flow with PKCE. Browser talks to BFF only; BFF holds tokens server-side and maintains a secure session cookie.
+- Service-to-Service: Client Credentials Flow (services confidential clients).
+- Optional: Token Exchange for BFF → Gateway/API audience alignment when needed (e.g., `aud=gateway`).
 
 ## Token Lifetimes
 - Access Token: 5–15 minutes (short-lived, reduces blast radius).
@@ -24,6 +24,8 @@ Defines OAuth2/OIDC flows, token lifetimes, rotation, and revocation policies fo
 ## Validation
 - Gateway: Validate JWT (issuer, audience, signature via JWKS, expiry) and enforce deny-by-default.
 - Services: Re-validate JWT and apply policy-based authorization.
+- BFF: Validates OIDC responses, stores tokens server-side, issues only session cookie to browser.
+- Audience: Enable audience validation for tokens used at Gateway/Services (e.g., `gateway`, `orderservice`, `productservice`).
 - mTLS: Consider for critical internal hops.
 
 ## Secrets & Storage
@@ -33,4 +35,10 @@ Defines OAuth2/OIDC flows, token lifetimes, rotation, and revocation policies fo
 
 ## Observability & Auditing
 - Log `traceId`, `correlationId`, `userId/clientId`, `permissions`, outcome (Allow/Deny), latency.
+- BFF: log login/logout, refresh outcomes, CSRF validation results.
 - Alert on auth failures, token reuse, rate limit breaches, abnormal 403/401 spikes.
+
+## Cookie & CSRF (BFF)
+- Cookie: HttpOnly, Secure (prod), `SameSite=Lax` (dev) or `SameSite=None` with HTTPS.
+- CSRF: Protect state-changing endpoints; use double-submit or anti-forgery tokens.
+- CORS: Restrict to SPA origins; prefer browser → BFF only.
