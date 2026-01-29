@@ -1,0 +1,37 @@
+{
+  "ReverseProxy": {
+    "Routes": {
+      "orders-route": {
+        "ClusterId": "orders-cluster",
+        "Match": { "Path": "/api/v1/orders/{**catchall}" },
+        "Transforms": [
+          { "PathRemovePrefix": "/" }
+        ]
+      },
+      "orders-root-route": {
+        "ClusterId": "orders-cluster",
+        "Match": { "Path": "/api/v1/orders" }
+      },
+      "products-route": {
+        "ClusterId": "products-cluster",
+        "Match": { "Path": "/api/v1/products/{**catchall}" }
+      },
+      "products-root-route": {
+        "ClusterId": "products-cluster",
+        "Match": { "Path": "/api/v1/products" }
+      }
+    },
+    "Clusters": {
+      "orders-cluster": {
+        "Destinations": {
+          "orderservice": { "Address": "http://localhost:5000/" }
+        }
+      },
+      "products-cluster": {
+        "Destinations": {
+          "productservice": { "Address": "http://localhost:5002/" }
+        }
+      }
+    }
+  }
+}

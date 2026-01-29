@@ -1,0 +1,26 @@
+{
+  "clients": [
+    {
+      "clientId": "gateway",
+      "type": "public",
+      "flows": ["authorization_code"],
+      "redirectUris": [
+        "http://localhost:5000/*",
+        "http://localhost:5173/*",
+        "http://localhost:8081/*"
+      ]
+    },
+    {
+      "clientId": "orderservice",
+      "type": "confidential",
+      "flows": ["client_credentials"],
+      "secret": "changeme-orderservice"
+    },
+    {
+      "clientId": "productservice",
+      "type": "confidential",
+      "flows": ["client_credentials"],
+      "secret": "changeme-productservice"
+    }
+  ]
+}

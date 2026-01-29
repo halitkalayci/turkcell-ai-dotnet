@@ -1,4 +1,5 @@
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using OrderService.Application.Commands.CreateOrder;
 using OrderService.Application.Commands.UpdateOrderStatus;
@@ -8,6 +9,8 @@ using OrderService.Application.Queries.GetOrderById;
 using OrderService.Application.Queries.GetOrders;
 using OrderService.Domain.Enums;
 using System.Diagnostics;
+
+using TurkcellAI.Core.Application.Authorization;
 
 namespace OrderService.Controllers;
 
@@ -29,6 +32,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = PolicyNames.OrdersCreate)]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status500InternalServerError)]
@@ -39,6 +43,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Policy = PolicyNames.OrdersRead)]
     [ProducesResponseType(typeof(OrderListResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status500InternalServerError)]
@@ -71,6 +76,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpGet("{orderId}")]
+    [Authorize(Policy = PolicyNames.OrdersRead)]
     [ProducesResponseType(typeof(OrderResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status500InternalServerError)]
@@ -88,6 +94,7 @@ public class OrdersController : ControllerBase
     }
 
     [HttpPatch("{orderId}/status")]
+    [Authorize(Policy = PolicyNames.OrdersUpdateStatus)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status404NotFound)]

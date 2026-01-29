@@ -1,4 +1,4 @@
-Microsoft Visual Studio Solution File, Format Version 12.00
+﻿Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.5.2.0
 MinimumVisualStudioVersion = 10.0.40219.1
@@ -11,6 +11,8 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurkcellAI.Contracts", "src\TurkcellAI.Contracts\TurkcellAI.Contracts.csproj", "{0474BA21-FF50-CE43-CDD9-20FDABD728FB}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurkcellAI.Core", "src\TurkcellAI.Core\TurkcellAI.Core.csproj", "{7F77652F-7266-6EE2-59AD-B0D8559D6A90}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "TurkcellAI.Gateway", "src\Gateway\TurkcellAI.Gateway.csproj", "{D0F655C2-9E74-48AC-8235-D642B3546962}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -34,6 +36,10 @@ Global
 		{7F77652F-7266-6EE2-59AD-B0D8559D6A90}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7F77652F-7266-6EE2-59AD-B0D8559D6A90}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7F77652F-7266-6EE2-59AD-B0D8559D6A90}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D0F655C2-9E74-48AC-8235-D642B3546962}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D0F655C2-9E74-48AC-8235-D642B3546962}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D0F655C2-9E74-48AC-8235-D642B3546962}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D0F655C2-9E74-48AC-8235-D642B3546962}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -43,6 +49,7 @@ Global
 		{AE867C6C-CEDE-ECCD-C92F-36AFF25C6BDF} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{0474BA21-FF50-CE43-CDD9-20FDABD728FB} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 		{7F77652F-7266-6EE2-59AD-B0D8559D6A90} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
+		{D0F655C2-9E74-48AC-8235-D642B3546962} = {827E0CD3-B72D-47B6-A68D-7590B98EB39B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {006899A9-45FE-4303-B3D2-461268A475A0}

@@ -24,6 +24,9 @@ paths:
       summary: Create a new order
       description: Creates a new order with the provided items
       operationId: createOrder
+      security:
+        - KeycloakOAuth:
+            - orders:order:create
       requestBody:
         required: true
         content:
@@ -56,6 +59,9 @@ paths:
       summary: List orders
       description: Retrieve a paginated list of orders
       operationId: listOrders
+      security:
+        - KeycloakOAuth:
+            - orders:order:read
       parameters:
         - name: pageNumber
           in: query
@@ -116,6 +122,9 @@ paths:
       summary: Get order by ID
       description: Retrieve detailed information about a specific order
       operationId: getOrderById
+      security:
+        - KeycloakOAuth:
+            - orders:order:read
       parameters:
         - name: orderId
           in: path
@@ -151,6 +160,9 @@ paths:
       summary: Update order status
       description: Update the status of an existing order
       operationId: updateOrderStatus
+      security:
+        - KeycloakOAuth:
+            - orders:order:update_status
       parameters:
         - name: orderId
           in: path
@@ -192,6 +204,23 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 components:
+  securitySchemes:
+    KeycloakOAuth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: http://localhost:8080/realms/turkcell-ai/protocol/openid-connect/auth
+          tokenUrl: http://localhost:8080/realms/turkcell-ai/protocol/openid-connect/token
+          scopes:
+            orders:order:create: Create orders
+            orders:order:read: Read orders
+            orders:order:update_status: Update order status
+        clientCredentials:
+          tokenUrl: http://localhost:8080/realms/turkcell-ai/protocol/openid-connect/token
+          scopes:
+            orders:order:create: Create orders
+            orders:order:read: Read orders
+            orders:order:update_status: Update order status
   schemas:
     Order:
       type: object

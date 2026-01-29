@@ -38,6 +38,24 @@ services:
       - mssql-data:/var/opt/mssql
     restart: unless-stopped
 
+  keycloak:
+    image: quay.io/keycloak/keycloak:24.0
+    container_name: tai-keycloak
+    command: ["start-dev", "--import-realm"]
+    environment:
+      - KEYCLOAK_ADMIN=admin
+      - KEYCLOAK_ADMIN_PASSWORD=admin
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./infra/keycloak/import:/opt/keycloak/data/import
+    healthcheck:
+      test: ["CMD-SHELL", "curl -fsS http://localhost:8080/realms/master/.well-known/openid-configuration || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+    restart: unless-stopped
+
 volumes:
   rabbitmq-data:
   mssql-data:

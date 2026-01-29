@@ -24,6 +24,9 @@ paths:
       summary: Create a new product
       description: Creates a new product in the catalog
       operationId: createProduct
+      security:
+        - KeycloakOAuth:
+            - products:product:create
       requestBody:
         required: true
         content:
@@ -56,6 +59,9 @@ paths:
       summary: List products
       description: Retrieve a paginated list of products
       operationId: listProducts
+      security:
+        - KeycloakOAuth:
+            - products:product:read
       parameters:
         - name: pageNumber
           in: query
@@ -125,6 +131,9 @@ paths:
       summary: Get product by ID
       description: Retrieve a single product by its unique identifier
       operationId: getProductById
+      security:
+        - KeycloakOAuth:
+            - products:product:read
       parameters:
         - name: id
           in: path
@@ -159,6 +168,9 @@ paths:
       summary: Update product
       description: Update an existing product
       operationId: updateProduct
+      security:
+        - KeycloakOAuth:
+            - products:product:update
       parameters:
         - name: id
           in: path
@@ -205,6 +217,9 @@ paths:
       summary: Delete product
       description: Delete a product from the catalog
       operationId: deleteProduct
+      security:
+        - KeycloakOAuth:
+            - products:product:delete
       parameters:
         - name: id
           in: path
@@ -230,6 +245,25 @@ paths:
                 $ref: '#/components/schemas/Error'
 
 components:
+  securitySchemes:
+    KeycloakOAuth:
+      type: oauth2
+      flows:
+        authorizationCode:
+          authorizationUrl: http://localhost:8080/realms/turkcell-ai/protocol/openid-connect/auth
+          tokenUrl: http://localhost:8080/realms/turkcell-ai/protocol/openid-connect/token
+          scopes:
+            products:product:create: Create products
+            products:product:read: Read products
+            products:product:update: Update products
+            products:product:delete: Delete products
+        clientCredentials:
+          tokenUrl: http://localhost:8080/realms/turkcell-ai/protocol/openid-connect/token
+          scopes:
+            products:product:create: Create products
+            products:product:read: Read products
+            products:product:update: Update products
+            products:product:delete: Delete products
   schemas:
     CreateProductRequest:
       type: object

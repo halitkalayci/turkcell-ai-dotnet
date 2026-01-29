@@ -1,5 +1,7 @@
 using FluentValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using TurkcellAI.Core.Application.Authorization;
 using ProductService.Application.DTOs;
 using TurkcellAI.Core.Application.DTOs;
 using TurkcellAI.Core.Application.Enums;
@@ -26,6 +28,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPost]
+    [Authorize(Policy = PolicyNames.ProductsCreate)]
     [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status201Created)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status500InternalServerError)]
@@ -53,6 +56,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
+    [Authorize(Policy = PolicyNames.ProductsRead)]
     [ProducesResponseType(typeof(ProductListResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status500InternalServerError)]
@@ -88,6 +92,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet("{id}")]
+    [Authorize(Policy = PolicyNames.ProductsRead)]
     [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status500InternalServerError)]
@@ -108,6 +113,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpPut("{id}")]
+    [Authorize(Policy = PolicyNames.ProductsUpdate)]
     [ProducesResponseType(typeof(ProductResponse), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status400BadRequest)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status404NotFound)]
@@ -146,6 +152,7 @@ public class ProductsController : ControllerBase
     }
 
     [HttpDelete("{id}")]
+    [Authorize(Policy = PolicyNames.ProductsDelete)]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status404NotFound)]
     [ProducesResponseType(typeof(TurkcellAI.Core.Application.DTOs.ErrorResponse), StatusCodes.Status500InternalServerError)]
