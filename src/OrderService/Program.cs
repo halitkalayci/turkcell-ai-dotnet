@@ -19,8 +19,7 @@ builder.Services.AddSwaggerGen();
 // Database (SQL Server)
 builder.Services.AddDbContext<OrderDbContext>(options =>
     options.UseSqlServer(
-        builder.Configuration.GetConnectionString("OrderServiceDb"),
-        sql => sql.EnableRetryOnFailure()
+        builder.Configuration.GetConnectionString("OrderServiceDb")
     ));
 
 // Repositories and Unit of Work (Ports/Adapters)
