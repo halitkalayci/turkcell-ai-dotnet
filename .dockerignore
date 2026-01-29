@@ -1,0 +1,11 @@
+**/bin/
+**/obj/
+**/.vs/
+**/.git/
+**/node_modules/
+*.user
+*.rsuser
+*.suo
+*.userosscache
+*.userprefs
+.DS_Store

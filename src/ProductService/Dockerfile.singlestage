@@ -1,0 +1,32 @@
+# syntax=docker/dockerfile:1
+FROM mcr.microsoft.com/dotnet/sdk:9.0
+
+# Use a workspace dir to keep layout clean
+WORKDIR /workspace
+
+# Copy project files first for better layer caching
+COPY turkcell-ai.sln ./
+COPY src/ProductService/ProductService.csproj src/ProductService/
+COPY src/TurkcellAI.Core/TurkcellAI.Core.csproj src/TurkcellAI.Core/
+COPY src/TurkcellAI.Contracts/TurkcellAI.Contracts.csproj src/TurkcellAI.Contracts/
+COPY NuGet.Config ./NuGet.Config
+
+# Restore dependencies for the ProductService
+ENV NUGET_PACKAGES=/root/.nuget/packages
+RUN dotnet restore src/ProductService/ProductService.csproj --configfile ./NuGet.Config
+
+# Copy the full source
+COPY src/ ./src/
+
+# Publish the app to a runnable folder (still single-stage)
+RUN dotnet publish src/ProductService/ProductService.csproj -c Release -o /app/publish --no-restore
+
+# Configure Kestrel to listen on 8080 in container
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080 \
+    ASPNETCORE_ENVIRONMENT=Production
+
+WORKDIR /app/publish
+EXPOSE 8080
+
+# Run the API from the publish output
+ENTRYPOINT ["dotnet", "ProductService.dll"]
