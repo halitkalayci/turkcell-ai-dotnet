@@ -16,9 +16,12 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Database
+// Database (SQL Server)
 builder.Services.AddDbContext<OrderDbContext>(options =>
-    options.UseInMemoryDatabase("OrderServiceDb"));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("OrderServiceDb"),
+        sql => sql.EnableRetryOnFailure()
+    ));
 
 // Repositories and Unit of Work (Ports/Adapters)
 builder.Services.AddScoped<IOrderRepository, OrderRepository>();
@@ -45,6 +48,13 @@ var app = builder.Build();
 
 // Middleware
 app.UseCoreExceptionHandling();
+
+// Auto-run migrations on startup
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<OrderDbContext>();
+    db.Database.Migrate();
+}
 
 if (app.Environment.IsDevelopment())
 {

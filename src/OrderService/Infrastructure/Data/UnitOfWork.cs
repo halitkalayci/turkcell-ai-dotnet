@@ -1,3 +1,4 @@
+using Microsoft.EntityFrameworkCore.Storage;
 using TurkcellAI.Core.Application.Abstractions;
 
 namespace OrderService.Infrastructure.Data;
@@ -9,27 +10,37 @@ namespace OrderService.Infrastructure.Data;
 public class UnitOfWork : IUnitOfWork
 {
     private readonly OrderDbContext _context;
+    private IDbContextTransaction? _transaction;
 
     public UnitOfWork(OrderDbContext context)
     {
         _context = context;
     }
 
-    // Transaction methods for Core IUnitOfWork (InMemory DB)
-    public Task BeginTransactionAsync(CancellationToken cancellationToken = default)
+    // Transaction methods for Core IUnitOfWork (SQL Server)
+    public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
     {
-        // InMemory provider does not support real transactions; no-op
-        return Task.CompletedTask;
+        _transaction = await _context.Database.BeginTransactionAsync(cancellationToken);
     }
 
     public async Task CommitAsync(CancellationToken cancellationToken = default)
     {
         await _context.SaveChangesAsync(cancellationToken);
+        if (_transaction != null)
+        {
+            await _transaction.CommitAsync(cancellationToken);
+            await _transaction.DisposeAsync();
+            _transaction = null;
+        }
     }
 
-    public Task RollbackAsync(CancellationToken cancellationToken = default)
+    public async Task RollbackAsync(CancellationToken cancellationToken = default)
     {
-        // InMemory provider does not support rollback; no-op
-        return Task.CompletedTask;
+        if (_transaction != null)
+        {
+            await _transaction.RollbackAsync(cancellationToken);
+            await _transaction.DisposeAsync();
+            _transaction = null;
+        }
     }
 }
